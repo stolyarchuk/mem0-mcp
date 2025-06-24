@@ -59,9 +59,7 @@ FROM python:3.12-slim-bookworm as production
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PATH="/app/.venv/bin:$PATH" \
-    MEM0_API_KEY="" \
-    HOST=0.0.0.0 \
-    PORT=8080
+    MEM0_API_KEY=""
 
 # Install system dependencies for runtime
 RUN apt-get update && apt-get install -y \
@@ -103,10 +101,10 @@ EXPOSE 8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD curl -f http://localhost:${PORT:-8080}/sse || exit 1
+    CMD curl -f http://localhost:8080/sse || exit 1
 
 # Default command - runs the Python SSE server
-CMD ["python", "main.py", "--host", "${HOST:-0.0.0.0}", "--port", "${PORT:-8080}"]
+CMD ["python", "main.py", "--host", "0.0.0.0", "--port", "8080"]
 
 # Alternative commands can be used:
 # For Node.js MCP server: CMD ["node", "node/mem0/dist/index.js"]
