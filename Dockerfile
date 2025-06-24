@@ -59,9 +59,7 @@ FROM python:3.12-slim-bookworm as production
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PATH="/app/.venv/bin:$PATH" \
-    MEM0_API_KEY="" \
-    HOST=0.0.0.0 \
-    PORT=8080
+    MEM0_API_KEY=""
 
 # Install system dependencies for runtime
 RUN apt-get update && apt-get install -y \
@@ -75,7 +73,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
     npm install -g pnpm
 
 # Create non-root user
-RUN groupadd -r mem0 && useradd -r -g mem0 mem0
+RUN groupadd -r mem0 && useradd -m -g mem0 mem0
 
 # Set working directory
 WORKDIR /app
@@ -93,7 +91,7 @@ COPY --from=node-base /app/node/mem0/package.json ./node/mem0/
 COPY --from=node-base /app/node/mem0/node_modules ./node/mem0/node_modules/
 
 # Change ownership to non-root user
-RUN chown -R mem0:mem0 /app
+RUN chown -R mem0:mem0 /app && chown -R mem0:mem0 /home/mem0
 
 # Switch to non-root user
 USER mem0
@@ -103,7 +101,7 @@ EXPOSE 8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD curl -f http://localhost:${PORT:-8080}/sse || exit 1
+    CMD curl -f http://localhost:8080/sse || exit 1
 
 # Default command - runs the Python SSE server
 CMD ["python", "main.py", "--host", "0.0.0.0", "--port", "8080"]
